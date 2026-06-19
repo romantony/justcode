@@ -13,12 +13,12 @@
     "id": "claude",
     "name": "Claude (Anthropic)",
     "provider": "anthropic",
-    "model": "claude-3-5-sonnet-20241022",
-    "apiKey": "",
-    "baseUrl": "https://api.anthropic.com",
+    "model": "claude-sonnet-4-6",
+    "apiKey": "Bearer f95b9890cefc48b3b906b321b7038a21",
+    "baseUrl": "https://api.kie.ai/claude",
     "maxTokens": 4096,
     "temperature": 0.2,
-    "useSubscription": true,
+    "useSubscription": false,
     "authToken": "ktp-ub125"
   },
   "codex": {

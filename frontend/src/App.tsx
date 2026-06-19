@@ -5,6 +5,7 @@ import AgentGraph from './components/AgentGraph';
 import AgentsConfig from './components/AgentsConfig';
 import SkillsManager from './components/SkillsManager';
 import SettingsPanel from './components/SettingsPanel';
+import FileExplorer from './components/FileExplorer';
 
 interface ChatSummary {
   id: string;
@@ -319,6 +320,7 @@ export default function App() {
         {/* Content Tabs */}
         {activeTab === 'chat' && (
           <div className="workspace-grid">
+            <FileExplorer />
             <ChatInterface 
               messages={messages} 
               running={running} 

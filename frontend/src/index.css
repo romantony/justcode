@@ -254,10 +254,10 @@ body {
 /* Split Pane Layout (For Chat Workspace) */
 .workspace-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 24px;
+  grid-template-columns: 240px 1.2fr 0.8fr;
+  gap: 16px;
   height: calc(100vh - 112px);
-  padding: 24px;
+  padding: 16px;
   overflow: hidden;
 }
 
@@ -724,4 +724,42 @@ body {
   font-size: 0.75rem;
   font-family: var(--font-mono);
   color: var(--text-secondary);
+}
+
+/* File Explorer Styles */
+.file-explorer-pane {
+  background-color: var(--bg-panel);
+  border-right: 1px solid var(--border-color);
+}
+
+.explorer-node {
+  transition: background-color 0.15s ease, color 0.15s ease;
+  border-radius: 4px;
+  margin: 1px 4px;
+  user-select: none;
+}
+
+.explorer-node:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+body:not(.dark) .explorer-node:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.folder-node {
+  color: var(--text-primary);
+}
+
+.file-node {
+  color: var(--text-secondary);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
 }

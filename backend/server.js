@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { db } from './db.js';
 import { mcpManager } from './mcp.js';
@@ -166,6 +167,97 @@ app.delete('/api/mcp/servers/:id', async (req, res) => {
 
 app.get('/api/mcp/tools', (req, res) => {
   res.json(mcpManager.getAllMCPTools());
+});
+
+// --- WORKSPACE FILE EXPLORER ENDPOINTS ---
+app.get('/api/workspace/files', (req, res) => {
+  const workspacePath = process.env.JUSTCODE_WORKSPACE || path.resolve(process.cwd(), '..');
+  
+  function getFileTree(dir, relativePath = '') {
+    const absolutePath = path.join(dir, relativePath);
+    let stats;
+    try {
+      stats = fs.statSync(absolutePath);
+    } catch (e) {
+      return null;
+    }
+    
+    const name = path.basename(absolutePath) || relativePath || '/';
+    
+    if (stats.isDirectory()) {
+      const ignoredDirs = ['node_modules', '.git', 'dist', 'build', '.idea', '.vscode', '.system_generated', 'temp_skills'];
+      if (ignoredDirs.includes(name)) {
+        return null;
+      }
+      
+      let children = [];
+      try {
+        const files = fs.readdirSync(absolutePath);
+        for (const file of files) {
+          const child = getFileTree(dir, path.join(relativePath, file));
+          if (child) {
+            children.push(child);
+          }
+        }
+      } catch (err) {
+        // Ignore reading errors
+      }
+      
+      children.sort((a, b) => {
+        if (a.isDirectory && !b.isDirectory) return -1;
+        if (!a.isDirectory && b.isDirectory) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      return {
+        name,
+        path: relativePath,
+        isDirectory: true,
+        children
+      };
+    } else {
+      return {
+        name,
+        path: relativePath,
+        isDirectory: false,
+        size: stats.size
+      };
+    }
+  }
+  
+  try {
+    const tree = getFileTree(workspacePath);
+    res.json({
+      workspacePath,
+      tree: tree ? tree.children : []
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/workspace/file', (req, res) => {
+  const filePath = req.query.path;
+  if (!filePath) {
+    return res.status(400).json({ error: 'Missing path query parameter' });
+  }
+  const workspacePath = process.env.JUSTCODE_WORKSPACE || path.resolve(process.cwd(), '..');
+  const absolutePath = path.resolve(workspacePath, filePath);
+  
+  // Guard to prevent directory traversal
+  if (!absolutePath.startsWith(workspacePath)) {
+    return res.status(403).json({ error: 'Access denied: Path is outside workspace.' });
+  }
+  
+  try {
+    if (!fs.existsSync(absolutePath) || fs.statSync(absolutePath).isDirectory()) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+    const content = fs.readFileSync(absolutePath, 'utf8');
+    res.json({ content });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Fallback to index.html for frontend routing support
