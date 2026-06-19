@@ -25,6 +25,9 @@ interface ChatInterfaceProps {
   onResume?: () => void;
   selectedFiles?: string[];
   onRemoveFile?: (path: string) => void;
+  agents?: Record<string, any>;
+  targetAgentId?: string;
+  onTargetAgentChange?: (agentId: string) => void;
 }
 
 interface LLMConfig {
@@ -41,7 +44,10 @@ export default function ChatInterface({
   onStop,
   onResume,
   selectedFiles = [],
-  onRemoveFile
+  onRemoveFile,
+  agents = {},
+  targetAgentId = 'architect',
+  onTargetAgentChange
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [llmConfigs, setLlmConfigs] = useState<LLMConfig[]>([]);
@@ -132,19 +138,43 @@ export default function ChatInterface({
           Agent Execution feed
         </span>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', marginRight: running ? '16px' : '0' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>LLM Override:</span>
-          <select 
-            className="form-select" 
-            style={{ width: '165px', padding: '2px 6px', fontSize: '0.75rem', height: 'auto', margin: 0, backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
-            value={activeLlmOverride || ''}
-            onChange={(e) => onLlmOverrideChange(e.target.value || null)}
-          >
-            <option value="">Default (Agent Setup)</option>
-            {llmConfigs.map(cfg => (
-              <option key={cfg.id} value={cfg.id}>{cfg.name}</option>
-            ))}
-          </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', marginRight: running ? '16px' : '0' }}>
+          {/* Target Agent Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Target Agent:</span>
+            <select 
+              className="form-select" 
+              style={{ width: '135px', padding: '2px 6px', fontSize: '0.75rem', height: 'auto', margin: 0, backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+              value={targetAgentId}
+              onChange={(e) => onTargetAgentChange?.(e.target.value)}
+              disabled={running}
+            >
+              {(agents && Object.keys(agents).length > 0 ? Object.values(agents) : [
+                { id: 'architect', name: 'Architect' },
+                { id: 'coder', name: 'Coder' },
+                { id: 'tester', name: 'Tester' },
+                { id: 'reviewer', name: 'Reviewer' }
+              ]).map((agent: any) => (
+                <option key={agent.id} value={agent.id}>{agent.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* LLM Override */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>LLM Override:</span>
+            <select 
+              className="form-select" 
+              style={{ width: '160px', padding: '2px 6px', fontSize: '0.75rem', height: 'auto', margin: 0, backgroundColor: 'var(--bg-card)', border: '1px solid var(--border-color)' }}
+              value={activeLlmOverride || ''}
+              onChange={(e) => onLlmOverrideChange(e.target.value || null)}
+            >
+              <option value="">Default (Agent Setup)</option>
+              {llmConfigs.map(cfg => (
+                <option key={cfg.id} value={cfg.id}>{cfg.name}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {running && (

@@ -30,7 +30,7 @@ export function stopExecution(chatId) {
   return false;
 }
 
-export async function startA2AExecution(chatId, userPrompt, llmOverride = null, contextFiles = []) {
+export async function startA2AExecution(chatId, userPrompt, llmOverride = null, contextFiles = [], targetAgentId = 'architect') {
   if (activeChats.has(chatId)) {
     throw new Error('An execution is already active for this chat.');
   }
@@ -80,12 +80,12 @@ export async function startA2AExecution(chatId, userPrompt, llmOverride = null, 
     }
   }
 
-  // Create initial message targeting the architect
+  // Create initial message targeting the specified agent
   const initialMsg = {
     id: `msg-${uuidv4()}`,
     role: 'user',
     sender: 'user',
-    recipient: 'architect',
+    recipient: targetAgentId || 'architect',
     content: enrichedPrompt,
     status: 'pending',
     timestamp: Date.now()

@@ -31,6 +31,8 @@ export default function App() {
   const [statusText, setStatusText] = useState('Workspace Ready');
   const [showExplorer, setShowExplorer] = useState(true);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+  const [agents, setAgents] = useState<Record<string, any>>({});
+  const [targetAgentId, setTargetAgentId] = useState<string>('architect');
 
   const handleToggleSelectFile = (path: string) => {
     setSelectedFiles(prev => 
@@ -56,9 +58,10 @@ export default function App() {
     }
   }, [theme]);
 
-  // Load chats on mount
+  // Load chats and agents on mount
   useEffect(() => {
     fetchChats();
+    fetchAgents();
   }, []);
 
   // Listen to Server-Sent Events from backend
@@ -100,6 +103,18 @@ export default function App() {
       eventSource.close();
     };
   }, []);
+
+  const fetchAgents = async () => {
+    try {
+      const res = await fetch('http://localhost:5001/api/agents');
+      if (res.ok) {
+        const data = await res.json();
+        setAgents(data);
+      }
+    } catch (e) {
+      console.error('Error fetching agents:', e);
+    }
+  };
 
   const fetchChats = async () => {
     try {
@@ -189,7 +204,8 @@ export default function App() {
           chatId: id,
           prompt,
           llmOverride: override,
-          contextFiles: selectedFiles
+          contextFiles: selectedFiles,
+          targetAgentId: targetAgentId
         })
       });
       if (res.ok) {
@@ -404,6 +420,9 @@ export default function App() {
                 onResume={handleResumeWorkflow}
                 selectedFiles={selectedFiles}
                 onRemoveFile={handleToggleSelectFile}
+                agents={agents}
+                targetAgentId={targetAgentId}
+                onTargetAgentChange={setTargetAgentId}
               />
               <AgentGraph activeAgentId={activeAgent} />
             </div>

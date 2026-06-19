@@ -97,12 +97,12 @@ app.get('/api/chats/:id', (req, res) => {
 });
 
 app.post('/api/chats', async (req, res) => {
-  const { chatId, prompt, llmOverride, contextFiles } = req.body;
+  const { chatId, prompt, llmOverride, contextFiles, targetAgentId } = req.body;
   if (!chatId || !prompt) {
     return res.status(400).json({ error: 'Missing chatId or prompt' });
   }
   try {
-    const chat = await startA2AExecution(chatId, prompt, llmOverride, contextFiles || []);
+    const chat = await startA2AExecution(chatId, prompt, llmOverride, contextFiles || [], targetAgentId || 'architect');
     res.json(chat);
   } catch (err) {
     res.status(500).json({ error: err.message });
