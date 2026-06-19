@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { db } from './db.js';
 import { mcpManager } from './mcp.js';
 
@@ -145,7 +145,7 @@ export async function executeSkill(skillId, workspacePath, params, metadata = nu
     fs.writeFileSync(skillFile, skill.code, 'utf-8');
     
     try {
-      const skillModule = await import(`file://${skillFile}`);
+      const skillModule = await import(pathToFileURL(skillFile).href);
       if (typeof skillModule.run !== 'function') {
         throw new Error(`Skill [${skill.name}] does not export a run() function.`);
       }

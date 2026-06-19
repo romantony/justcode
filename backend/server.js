@@ -1,14 +1,23 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { db } from './db.js';
 import { mcpManager } from './mcp.js';
 import { startA2AExecution, stopExecution, a2aEvents } from './a2a.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static frontend client
+const publicHtmlPath = path.join(__dirname, 'public_html');
+app.use(express.static(publicHtmlPath));
 
 // Initialize MCP Servers on start
 mcpManager.init().catch(err => {
@@ -157,6 +166,14 @@ app.delete('/api/mcp/servers/:id', async (req, res) => {
 
 app.get('/api/mcp/tools', (req, res) => {
   res.json(mcpManager.getAllMCPTools());
+});
+
+// Fallback to index.html for frontend routing support
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(publicHtmlPath, 'index.html'));
 });
 
 app.listen(PORT, () => {

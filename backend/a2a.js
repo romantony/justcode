@@ -34,7 +34,7 @@ export async function startA2AExecution(chatId, userPrompt, llmOverride = null) 
     throw new Error('An execution is already active for this chat.');
   }
 
-  const workspacePath = path.resolve(process.cwd(), '..');
+  const workspacePath = process.env.JUSTCODE_WORKSPACE || path.resolve(process.cwd(), '..');
   
   // Set up cancellation controller
   const controller = new AbortController();

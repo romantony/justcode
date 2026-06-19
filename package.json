@@ -1,10 +1,27 @@
 {
   "name": "justcode-agent-workspace",
   "version": "1.0.0",
-  "description": "Full-stack Developer Agent Workspace with A2A multi-agent loops and MCP support",
-  "private": true,
+  "description": "Multi-LLM Developer Agent Workspace with A2A multi-agent loops and MCP support",
+  "type": "module",
+  "private": false,
+  "bin": {
+    "justcode": "./bin/justcode.js"
+  },
+  "files": [
+    "bin/",
+    "backend/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend && rm -rf backend/public_html && cp -r frontend/dist backend/public_html",
     "start": "npx -y concurrently -k -p \"[{name}]\" -n \"Backend,Frontend\" -c \"purple,blue\" \"npm start --prefix backend\" \"npm run dev --prefix frontend\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "open": "^8.4.2",
+    "uuid": "^11.1.0"
   }
 }
