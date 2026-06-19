@@ -22,6 +22,7 @@ interface ChatInterfaceProps {
   onLlmOverrideChange: (override: string | null) => void;
   onSendMessage: (prompt: string) => void;
   onStop: () => void;
+  onResume?: () => void;
   selectedFiles?: string[];
   onRemoveFile?: (path: string) => void;
 }
@@ -38,6 +39,7 @@ export default function ChatInterface({
   onLlmOverrideChange, 
   onSendMessage, 
   onStop,
+  onResume,
   selectedFiles = [],
   onRemoveFile
 }: ChatInterfaceProps) {
@@ -296,14 +298,40 @@ export default function ChatInterface({
             Stop
           </button>
         ) : (
-          <button 
-            type="submit" 
-            className="btn-send"
-            disabled={!input.trim()}
-          >
-            <Play size={16} fill="white" />
-            Run
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {!running && messages.some(m => m.status === 'failed') && onResume && (
+              <button 
+                type="button" 
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '6px', 
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  color: 'var(--accent-color)',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  marginRight: '8px',
+                  transition: 'background 0.2s'
+                }}
+                onClick={onResume}
+              >
+                <Play size={12} fill="var(--accent-color)" />
+                Resume Workflow
+              </button>
+            )}
+            <button 
+              type="submit" 
+              className="btn-send"
+              disabled={!input.trim()}
+            >
+              <Play size={16} fill="white" />
+              Run
+            </button>
+          </div>
         )}
       </form>
       </div>

@@ -110,6 +110,60 @@ export async function startA2AExecution(chatId, userPrompt, llmOverride = null, 
   return chats[chatId];
 }
 
+export async function resumeA2AExecution(chatId, llmOverride = null) {
+  if (activeChats.has(chatId)) {
+    throw new Error('An execution is already active for this chat.');
+  }
+
+  const workspacePath = process.env.JUSTCODE_WORKSPACE || path.resolve(process.cwd(), '..');
+  const chats = db.getChats();
+  const chat = chats[chatId];
+  if (!chat) {
+    throw new Error(`Chat session [${chatId}] not found.`);
+  }
+
+  if (llmOverride !== undefined) {
+    chat.llmOverride = llmOverride;
+  }
+
+  let foundFailed = false;
+  for (const m of chat.messages) {
+    if (m.status === 'failed') {
+      m.status = 'pending';
+      delete m.error;
+      foundFailed = true;
+    }
+  }
+
+  if (!foundFailed && chat.messages.length > 0) {
+    const lastMsg = chat.messages[chat.messages.length - 1];
+    if (lastMsg.status !== 'completed' && lastMsg.status !== 'success') {
+      lastMsg.status = 'pending';
+      foundFailed = true;
+    }
+  }
+
+  db.saveChats(chats);
+
+  const controller = new AbortController();
+  activeChats.add(chatId);
+  chatControllers.set(chatId, controller);
+
+  runLoop(chatId, workspacePath, controller.signal).catch(err => {
+    console.error(`A2A Loop Error in chat [${chatId}]:`, err);
+    a2aEvents.emit('event', {
+      chatId,
+      type: 'execution_failed',
+      data: { error: err.message }
+    });
+  }).finally(() => {
+    activeChats.delete(chatId);
+    chatControllers.delete(chatId);
+  });
+
+  return chat;
+}
+
 async function runLoop(chatId, workspacePath, abortSignal) {
   let stepCount = 0;
   const maxSteps = 30; // Protect against infinite loops

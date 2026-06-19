@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import { db } from './db.js';
 import { mcpManager } from './mcp.js';
-import { startA2AExecution, stopExecution, a2aEvents } from './a2a.js';
+import { startA2AExecution, resumeA2AExecution, stopExecution, a2aEvents } from './a2a.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -103,6 +103,16 @@ app.post('/api/chats', async (req, res) => {
   }
   try {
     const chat = await startA2AExecution(chatId, prompt, llmOverride, contextFiles || []);
+    res.json(chat);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/chats/:id/resume', async (req, res) => {
+  const { llmOverride } = req.body;
+  try {
+    const chat = await resumeA2AExecution(req.params.id, llmOverride);
     res.json(chat);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -207,6 +207,31 @@ export default function App() {
     }
   };
 
+  const handleResumeWorkflow = async () => {
+    if (!activeChatId) return;
+
+    setStatusText('Resuming workflow...');
+    setRunning(true);
+
+    try {
+      const res = await fetch(`http://localhost:5001/api/chats/${activeChatId}/resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        fetchChats(); // Update sessions list
+        fetchChatDetails(activeChatId);
+      } else {
+        const data = await res.json();
+        alert(`Error resuming execution: ${data.error}`);
+        setRunning(false);
+      }
+    } catch (err: any) {
+      alert(`Network error resuming execution: ${err.message}`);
+      setRunning(false);
+    }
+  };
+
   const handleStopExecution = async () => {
     if (!activeChatId) return;
     setStatusText('Stopping execution...');
@@ -376,6 +401,7 @@ export default function App() {
                 onLlmOverrideChange={handleLlmOverrideChange}
                 onSendMessage={handleSendMessage} 
                 onStop={handleStopExecution}
+                onResume={handleResumeWorkflow}
                 selectedFiles={selectedFiles}
                 onRemoveFile={handleToggleSelectFile}
               />
