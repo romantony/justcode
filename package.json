@@ -1,0 +1,10 @@
+{
+  "name": "justcode-agent-workspace",
+  "version": "1.0.0",
+  "description": "Full-stack Developer Agent Workspace with A2A multi-agent loops and MCP support",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "start": "npx -y concurrently -k -p \"[{name}]\" -n \"Backend,Frontend\" -c \"purple,blue\" \"npm start --prefix backend\" \"npm run dev --prefix frontend\""
+  }
+}

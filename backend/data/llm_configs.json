@@ -1,0 +1,36 @@
+{
+  "default": {
+    "id": "default",
+    "name": "Gemini (Default)",
+    "provider": "gemini",
+    "model": "gemini-1.5-flash",
+    "apiKey": "",
+    "baseUrl": "https://generativelanguage.googleapis.com",
+    "maxTokens": 4096,
+    "temperature": 0.2
+  },
+  "claude": {
+    "id": "claude",
+    "name": "Claude (Anthropic)",
+    "provider": "anthropic",
+    "model": "claude-3-5-sonnet-20241022",
+    "apiKey": "",
+    "baseUrl": "https://api.anthropic.com",
+    "maxTokens": 4096,
+    "temperature": 0.2,
+    "useSubscription": true,
+    "authToken": "ktp-ub125"
+  },
+  "codex": {
+    "id": "codex",
+    "name": "Codex (OpenAI Proxy)",
+    "provider": "codex",
+    "model": "code-davinci-002",
+    "apiKey": "",
+    "baseUrl": "https://api.openai.com/v1",
+    "maxTokens": 4096,
+    "temperature": 0.2,
+    "useSubscription": false,
+    "authToken": ""
+  }
+}
