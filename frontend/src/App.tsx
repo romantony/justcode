@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Terminal, Users, Code, Settings, Sun, Moon, Plus, MessageSquare, ArrowRightLeft } from 'lucide-react';
+import { Users, Code, Settings, Sun, Moon, Plus, MessageSquare, ArrowRightLeft } from 'lucide-react';
 import ChatInterface from './components/ChatInterface';
 import AgentGraph from './components/AgentGraph';
 import AgentsConfig from './components/AgentsConfig';
@@ -213,7 +213,7 @@ export default function App() {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-header">
-          <Terminal size={22} style={{ color: 'var(--accent-color)' }} />
+          <img src="/logo.svg" alt="JustCode Logo" style={{ width: '22px', height: '22px' }} />
           <span className="sidebar-logo">JustCode Agents</span>
         </div>
 
