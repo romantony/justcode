@@ -50,7 +50,7 @@ When you receive a request:
 4. Wait for the Coder's updates and the Tester's results.
 5. If the Reviewer requests adjustments, revise the plan and guide the team.`,
     llmConfigId: 'default',
-    skills: ['list_directory', 'read_file', 'search_codebase'],
+    skills: ['list_directory', 'read_file', 'search_codebase', 'execute_command'],
     enabled: true
   },
   coder: {
@@ -64,7 +64,7 @@ When you receive a coding task:
 3. Send a message to the 'tester' agent requesting verification.
 4. If testing fails, read the test logs, fix the issues, and re-request verification.`,
     llmConfigId: 'default',
-    skills: ['write_file', 'read_file', 'list_directory', 'git_commit'],
+    skills: ['write_file', 'read_file', 'list_directory', 'git_commit', 'execute_command'],
     enabled: true
   },
   tester: {
@@ -90,7 +90,7 @@ When the Tester reports results:
 2. If code styling, logic, or testing is insufficient, send detailed feedback to the Coder or Architect.
 3. If everything is correct and verified, output 'APPROVED' and summarize the accomplished work for the User.`,
     llmConfigId: 'default',
-    skills: ['read_file'],
+    skills: ['read_file', 'execute_command'],
     enabled: true
   },
   incident_manager: {
@@ -158,7 +158,7 @@ When analyzing a problem:
 3. Commit your changes using 'git_commit' to ensure context auditing is preserved.
 4. Prompt the Tester or Reviewer to verify the changes.`,
     llmConfigId: 'default',
-    skills: ['write_file', 'read_file', 'list_directory', 'git_commit'],
+    skills: ['write_file', 'read_file', 'list_directory', 'git_commit', 'execute_command'],
     enabled: true
   },
   bugfix_agent: {
@@ -171,7 +171,7 @@ When analyzing a problem:
 3. Verify compilation and correctness.
 4. Commit your changes using 'git_commit' to preserve context auditing.`,
     llmConfigId: 'default',
-    skills: ['write_file', 'read_file', 'list_directory', 'git_commit'],
+    skills: ['write_file', 'read_file', 'list_directory', 'git_commit', 'execute_command'],
     enabled: true
   }
 };

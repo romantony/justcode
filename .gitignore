@@ -17,3 +17,6 @@ backend/temp_skills/
 
 # OS/System files
 .DS_Store
+
+# Local Agent Workspace data and configurations
+backend/data/
