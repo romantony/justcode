@@ -9,7 +9,13 @@ interface FileNode {
   children?: FileNode[];
 }
 
-export default function FileExplorer({ onCollapse }: { onCollapse?: () => void }) {
+interface FileExplorerProps {
+  onCollapse?: () => void;
+  selectedFiles?: string[];
+  onToggleSelectFile?: (path: string) => void;
+}
+
+export default function FileExplorer({ onCollapse, selectedFiles = [], onToggleSelectFile }: FileExplorerProps) {
   const [tree, setTree] = useState<FileNode[]>([]);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set(['']));
   const [searchTerm, setSearchTerm] = useState('');
@@ -133,16 +139,42 @@ export default function FileExplorer({ onCollapse }: { onCollapse?: () => void }
       );
     }
 
+    const isSelected = selectedFiles.includes(node.path);
+
     return (
       <div
         key={node.path}
         className="explorer-node file-node"
-        style={{ paddingLeft, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', height: '28px' }}
+        style={{ 
+          paddingLeft, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '6px', 
+          cursor: 'pointer', 
+          height: '28px',
+          backgroundColor: isSelected ? 'rgba(59, 130, 246, 0.1)' : 'transparent'
+        }}
         onClick={() => handleFileClick(node)}
       >
         <span style={{ width: '14px' }}></span>
+        {onToggleSelectFile && (
+          <input 
+            type="checkbox"
+            checked={isSelected}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => onToggleSelectFile(node.path)}
+            style={{ cursor: 'pointer', accentColor: 'var(--accent-color)', marginRight: '2px' }}
+          />
+        )}
         {getFileIcon(node.name)}
-        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ 
+          fontSize: '0.85rem', 
+          color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)', 
+          fontWeight: isSelected ? 500 : 400,
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis', 
+          whiteSpace: 'nowrap' 
+        }}>
           {node.name}
         </span>
       </div>

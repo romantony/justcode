@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { exec } from 'child_process';
 import { db } from './db.js';
 import { mcpManager } from './mcp.js';
 import { startA2AExecution, stopExecution, a2aEvents } from './a2a.js';
@@ -96,12 +97,12 @@ app.get('/api/chats/:id', (req, res) => {
 });
 
 app.post('/api/chats', async (req, res) => {
-  const { chatId, prompt, llmOverride } = req.body;
+  const { chatId, prompt, llmOverride, contextFiles } = req.body;
   if (!chatId || !prompt) {
     return res.status(400).json({ error: 'Missing chatId or prompt' });
   }
   try {
-    const chat = await startA2AExecution(chatId, prompt, llmOverride);
+    const chat = await startA2AExecution(chatId, prompt, llmOverride, contextFiles || []);
     res.json(chat);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -258,6 +259,22 @@ app.get('/api/workspace/file', (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+app.post('/api/terminal/run', (req, res) => {
+  const { command } = req.body;
+  if (!command) {
+    return res.status(400).json({ error: 'Missing command parameter' });
+  }
+  const workspacePath = process.env.JUSTCODE_WORKSPACE || path.resolve(process.cwd(), '..');
+  
+  exec(command, { cwd: workspacePath }, (error, stdout, stderr) => {
+    res.json({
+      stdout: stdout || '',
+      stderr: stderr || '',
+      exitCode: error ? error.code : 0
+    });
+  });
 });
 
 // Fallback to index.html for frontend routing support

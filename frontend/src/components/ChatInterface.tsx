@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Square, Code, Terminal, ChevronDown, ChevronRight, Check, AlertCircle } from 'lucide-react';
+import { Play, Square, Code, Terminal, ChevronDown, ChevronRight, Check, AlertCircle, X } from 'lucide-react';
 
 interface Message {
   id?: string;
@@ -22,6 +22,8 @@ interface ChatInterfaceProps {
   onLlmOverrideChange: (override: string | null) => void;
   onSendMessage: (prompt: string) => void;
   onStop: () => void;
+  selectedFiles?: string[];
+  onRemoveFile?: (path: string) => void;
 }
 
 interface LLMConfig {
@@ -35,7 +37,9 @@ export default function ChatInterface({
   activeLlmOverride, 
   onLlmOverrideChange, 
   onSendMessage, 
-  onStop 
+  onStop,
+  selectedFiles = [],
+  onRemoveFile
 }: ChatInterfaceProps) {
   const [input, setInput] = useState('');
   const [llmConfigs, setLlmConfigs] = useState<LLMConfig[]>([]);
@@ -214,7 +218,64 @@ export default function ChatInterface({
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className="chat-input-bar">
+      <div style={{ display: 'flex', flexDirection: 'column', borderTop: '1px solid var(--border-color)' }}>
+        {selectedFiles.length > 0 && (
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '6px',
+            padding: '10px 20px',
+            backgroundColor: 'var(--bg-code)',
+            borderBottom: '1px solid var(--border-color)',
+            maxHeight: '80px',
+            overflowY: 'auto'
+          }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', marginRight: '6px', userSelect: 'none' }}>
+              Attached Context:
+            </span>
+            {selectedFiles.map(path => {
+              const fileName = path.split(/[/\\]/).pop() || path;
+              return (
+                <div 
+                  key={path}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                    color: 'var(--accent-color)',
+                    padding: '2px 8px',
+                    borderRadius: '100px',
+                    fontSize: '0.725rem',
+                    fontWeight: 600,
+                    border: '1px solid rgba(59, 130, 246, 0.2)'
+                  }}
+                >
+                  <span>{fileName}</span>
+                  {onRemoveFile && (
+                    <button 
+                      onClick={() => onRemoveFile(path)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--accent-color)',
+                        cursor: 'pointer',
+                        padding: '0 2px',
+                        display: 'flex',
+                        alignItems: 'center'
+                      }}
+                      title="Remove from context"
+                    >
+                      <X size={10} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="chat-input-bar" style={{ borderTop: 'none' }}>
         <input
           type="text"
           className="chat-input"
@@ -245,6 +306,7 @@ export default function ChatInterface({
           </button>
         )}
       </form>
+      </div>
     </div>
   );
 }

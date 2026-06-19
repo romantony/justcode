@@ -6,6 +6,7 @@ import AgentsConfig from './components/AgentsConfig';
 import SkillsManager from './components/SkillsManager';
 import SettingsPanel from './components/SettingsPanel';
 import FileExplorer from './components/FileExplorer';
+import TerminalConsole from './components/TerminalConsole';
 
 interface ChatSummary {
   id: string;
@@ -29,6 +30,13 @@ export default function App() {
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [statusText, setStatusText] = useState('Workspace Ready');
   const [showExplorer, setShowExplorer] = useState(true);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
+  const handleToggleSelectFile = (path: string) => {
+    setSelectedFiles(prev => 
+      prev.includes(path) ? prev.filter(p => p !== path) : [...prev, path]
+    );
+  };
 
   const activeChatRef = useRef<string | null>(null);
 
@@ -180,10 +188,12 @@ export default function App() {
         body: JSON.stringify({
           chatId: id,
           prompt,
-          llmOverride: override
+          llmOverride: override,
+          contextFiles: selectedFiles
         })
       });
       if (res.ok) {
+        setSelectedFiles([]);
         fetchChats(); // Update sessions list
         fetchChatDetails(id);
       } else {
@@ -319,49 +329,59 @@ export default function App() {
         </header>
 
         {activeTab === 'chat' && (
-          <div className="workspace-grid" style={{
-            gridTemplateColumns: showExplorer ? '240px 1.2fr 0.8fr' : '40px 1.2fr 0.8fr'
-          }}>
-            {showExplorer ? (
-              <FileExplorer onCollapse={() => setShowExplorer(false)} />
-            ) : (
-              <div 
-                onClick={() => setShowExplorer(true)}
-                style={{
-                  backgroundColor: 'var(--bg-panel)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: '16px 0',
-                  cursor: 'pointer',
-                  gap: '12px',
-                  color: 'var(--text-secondary)',
-                  height: '100%',
-                  userSelect: 'none'
-                }}
-                title="Expand File Explorer"
-              >
-                <ChevronRight size={16} />
-                <span style={{
-                  writingMode: 'vertical-rl',
-                  textOrientation: 'mixed',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  letterSpacing: '1px'
-                }}>EXPLORER</span>
-              </div>
-            )}
-            <ChatInterface 
-              messages={messages} 
-              running={running} 
-              activeLlmOverride={activeLlmOverride}
-              onLlmOverrideChange={handleLlmOverrideChange}
-              onSendMessage={handleSendMessage} 
-              onStop={handleStopExecution}
-            />
-            <AgentGraph activeAgentId={activeAgent} />
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+            <div className="workspace-grid" style={{
+              gridTemplateColumns: showExplorer ? '240px 1.2fr 0.8fr' : '40px 1.2fr 0.8fr',
+              flex: 1
+            }}>
+              {showExplorer ? (
+                <FileExplorer 
+                  onCollapse={() => setShowExplorer(false)} 
+                  selectedFiles={selectedFiles}
+                  onToggleSelectFile={handleToggleSelectFile}
+                />
+              ) : (
+                <div 
+                  onClick={() => setShowExplorer(true)}
+                  style={{
+                    backgroundColor: 'var(--bg-panel)',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: '12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '16px 0',
+                    cursor: 'pointer',
+                    gap: '12px',
+                    color: 'var(--text-secondary)',
+                    height: '100%',
+                    userSelect: 'none'
+                  }}
+                  title="Expand File Explorer"
+                >
+                  <ChevronRight size={16} />
+                  <span style={{
+                    writingMode: 'vertical-rl',
+                    textOrientation: 'mixed',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    letterSpacing: '1px'
+                  }}>EXPLORER</span>
+                </div>
+              )}
+              <ChatInterface 
+                messages={messages} 
+                running={running} 
+                activeLlmOverride={activeLlmOverride}
+                onLlmOverrideChange={handleLlmOverrideChange}
+                onSendMessage={handleSendMessage} 
+                onStop={handleStopExecution}
+                selectedFiles={selectedFiles}
+                onRemoveFile={handleToggleSelectFile}
+              />
+              <AgentGraph activeAgentId={activeAgent} />
+            </div>
+            <TerminalConsole />
           </div>
         )}
 

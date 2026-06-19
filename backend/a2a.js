@@ -4,6 +4,7 @@ import { runAgent } from './agents.js';
 import { executeSkill } from './skills.js';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import fs from 'fs';
 
 export const a2aEvents = new EventEmitter();
 
@@ -29,7 +30,7 @@ export function stopExecution(chatId) {
   return false;
 }
 
-export async function startA2AExecution(chatId, userPrompt, llmOverride = null) {
+export async function startA2AExecution(chatId, userPrompt, llmOverride = null, contextFiles = []) {
   if (activeChats.has(chatId)) {
     throw new Error('An execution is already active for this chat.');
   }
@@ -60,13 +61,32 @@ export async function startA2AExecution(chatId, userPrompt, llmOverride = null) 
     chats[chatId].llmOverride = llmOverride;
   }
 
+  // Enrich prompt with chosen files context
+  let enrichedPrompt = userPrompt;
+  if (Array.isArray(contextFiles) && contextFiles.length > 0) {
+    enrichedPrompt += '\n\n### USER SPECIFIED FILE CONTEXT:\n';
+    for (const relativePath of contextFiles) {
+      const absolutePath = path.resolve(workspacePath, relativePath);
+      if (absolutePath.startsWith(workspacePath)) {
+        try {
+          if (fs.existsSync(absolutePath) && !fs.statSync(absolutePath).isDirectory()) {
+            const fileContent = fs.readFileSync(absolutePath, 'utf8');
+            enrichedPrompt += `\n--- File: ${relativePath} ---\n\`\`\`\n${fileContent}\n\`\`\`\n`;
+          }
+        } catch (e) {
+          console.error(`Failed to read user-specified context file: ${relativePath}`, e);
+        }
+      }
+    }
+  }
+
   // Create initial message targeting the architect
   const initialMsg = {
     id: `msg-${uuidv4()}`,
     role: 'user',
     sender: 'user',
     recipient: 'architect',
-    content: userPrompt,
+    content: enrichedPrompt,
     status: 'pending',
     timestamp: Date.now()
   };
