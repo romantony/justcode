@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Folder, FolderOpen, FileCode, File, RefreshCw, ChevronRight, ChevronDown, Search, X } from 'lucide-react';
+import { Folder, FolderOpen, FileCode, File, RefreshCw, ChevronRight, ChevronDown, Search, X, ChevronLeft } from 'lucide-react';
 
 interface FileNode {
   name: string;
@@ -9,7 +9,7 @@ interface FileNode {
   children?: FileNode[];
 }
 
-export default function FileExplorer() {
+export default function FileExplorer({ onCollapse }: { onCollapse?: () => void }) {
   const [tree, setTree] = useState<FileNode[]>([]);
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set(['']));
   const [searchTerm, setSearchTerm] = useState('');
@@ -158,14 +158,25 @@ export default function FileExplorer() {
             {workspaceName}
           </span>
         </div>
-        <button 
-          onClick={fetchTree} 
-          disabled={loading} 
-          style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          title="Refresh Workspace"
-        >
-          <RefreshCw size={14} className={loading ? 'spin-animation' : ''} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button 
+            onClick={fetchTree} 
+            disabled={loading} 
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Refresh Workspace"
+          >
+            <RefreshCw size={14} className={loading ? 'spin-animation' : ''} />
+          </button>
+          {onCollapse && (
+            <button 
+              onClick={onCollapse} 
+              style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              title="Collapse Explorer"
+            >
+              <ChevronLeft size={14} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-color)' }}>

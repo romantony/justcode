@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Users, Code, Settings, Sun, Moon, Plus, MessageSquare, ArrowRightLeft } from 'lucide-react';
+import { Users, Code, Settings, Sun, Moon, Plus, MessageSquare, ArrowRightLeft, ChevronRight } from 'lucide-react';
 import ChatInterface from './components/ChatInterface';
 import AgentGraph from './components/AgentGraph';
 import AgentsConfig from './components/AgentsConfig';
@@ -28,6 +28,7 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [statusText, setStatusText] = useState('Workspace Ready');
+  const [showExplorer, setShowExplorer] = useState(true);
 
   const activeChatRef = useRef<string | null>(null);
 
@@ -317,10 +318,41 @@ export default function App() {
           </div>
         </header>
 
-        {/* Content Tabs */}
         {activeTab === 'chat' && (
-          <div className="workspace-grid">
-            <FileExplorer />
+          <div className="workspace-grid" style={{
+            gridTemplateColumns: showExplorer ? '240px 1.2fr 0.8fr' : '40px 1.2fr 0.8fr'
+          }}>
+            {showExplorer ? (
+              <FileExplorer onCollapse={() => setShowExplorer(false)} />
+            ) : (
+              <div 
+                onClick={() => setShowExplorer(true)}
+                style={{
+                  backgroundColor: 'var(--bg-panel)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '16px 0',
+                  cursor: 'pointer',
+                  gap: '12px',
+                  color: 'var(--text-secondary)',
+                  height: '100%',
+                  userSelect: 'none'
+                }}
+                title="Expand File Explorer"
+              >
+                <ChevronRight size={16} />
+                <span style={{
+                  writingMode: 'vertical-rl',
+                  textOrientation: 'mixed',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  letterSpacing: '1px'
+                }}>EXPLORER</span>
+              </div>
+            )}
             <ChatInterface 
               messages={messages} 
               running={running} 
